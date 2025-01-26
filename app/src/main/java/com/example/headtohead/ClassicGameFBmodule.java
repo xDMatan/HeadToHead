@@ -80,7 +80,7 @@ public class ClassicGameFBmodule {
         CurrentQuestion.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue(String.class)!=null &&!snapshot.getValue(String.class).equals(""))
+                if(!snapshot.getValue(String.class).equals(""))
                 gameActivityClassic.SetQuestionForPlayersAndStartTheGame(snapshot.getValue(String.class));
             }
 

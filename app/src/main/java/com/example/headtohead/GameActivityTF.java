@@ -30,13 +30,19 @@ public class GameActivityTF extends AppCompatActivity implements View.OnClickLis
     private boolean WasP1Correct, WasP2Correct;
     private boolean CanGetNextQuestion = true;
 private MediaPlayer mediaPlayer;
+private Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_tf);
-        mediaPlayer = MediaPlayer.create(this, R.raw.lobby_classic_game);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.start();
+        intent = getIntent();
+        if(intent.getStringExtra("PlaySong").equals("true")) {
+            String Song = intent.getStringExtra("SongName");
+            int resourceId = getResources().getIdentifier(Song, "raw", getPackageName());
+            mediaPlayer = MediaPlayer.create(this,resourceId );
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
+        }
         fBmodule = new TFGameFBmodule(this);
         TvQuestion = findViewById(R.id.TvQuestion);
         fBmodule.TFSetPlayers(this);
@@ -198,8 +204,7 @@ private MediaPlayer mediaPlayer;
             btnFalse.setEnabled(false);
         }
         if (v == btnGoBackToMain) {
-            Intent i = new Intent(this, SignIn.class);
-            startActivity(i);
+           finish();
         }
     }
 

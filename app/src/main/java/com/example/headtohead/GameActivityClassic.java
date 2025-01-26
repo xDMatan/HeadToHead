@@ -1,5 +1,6 @@
 package com.example.headtohead;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,19 +39,28 @@ public class GameActivityClassic extends AppCompatActivity implements View.OnCli
     private Handler handler;
     private CountDownTimer countDownTimer;
 private MediaPlayer mediaPlayer;
-    ArrayList<String> stringArrayList;
+    private ArrayList<String> stringArrayList;
    private int WhichPLayerisPlaying=0;
    private String WaitingString;
-    CustomDialog customDialog;
+    private CustomDialog customDialog;
     private ArrayList<ClassicQuestion> classicCollection,Temp;
+    private Intent intent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_classic);
-        mediaPlayer = MediaPlayer.create(this, R.raw.lobby_classic_game);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.start();
+        intent = getIntent();
+        if(intent.getStringExtra("PlaySong").equals("true")) {
+            String Song = intent.getStringExtra("SongName");
+            int resourceId = getResources().getIdentifier(Song, "raw", getPackageName());
+            mediaPlayer = MediaPlayer.create(this,resourceId );
+
+
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
+        }
         collections = new GameCollections();
         classicCollection = collections.getClassisCollection();
         etAnwser = findViewById(R.id.etAnwser);
@@ -70,11 +80,11 @@ private MediaPlayer mediaPlayer;
         handler = new Handler();
         Current= findViewById(R.id.Tvcurrent);
         WaitingString = "Strating game in a few Seconds";
-        customDialog = new CustomDialog(this);
-        fBmodule.WhoNeedsToPlay(this);
+        customDialog = new CustomDialog(this,this);
         fBmodule.Chat(this);
         fBmodule.SetQuestion(this);
         fBmodule.ShowCustomDialog(this);
+        fBmodule.WhoNeedsToPlay(this);
     }
 
     public void StratingPoint(int player) {
@@ -112,7 +122,7 @@ private MediaPlayer mediaPlayer;
                             DatabaseReference CurrentPLayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
                             CurrentPLayer.setValue(WhoplaysFirst);
                         }
-                    },500);
+                    },1000);
                 }
             }
         } ,2000);
@@ -145,7 +155,7 @@ private MediaPlayer mediaPlayer;
         }
 
         else {
-            Current.setText("opponnent's turn");
+            Current.setText("opponnent's turn...");
 
         }
     }
@@ -235,12 +245,19 @@ else
     }
 
     public void CustomDialog(){
-        customDialog.show();
-        customDialog.Change(this);
-
+        if (!isFinishing() && !isDestroyed()) {
+            // וודא שהדיאלוג לא מוצג אם הוא כבר פעיל
+            if (customDialog != null && !customDialog.isShowing()) {
+                customDialog.show();
+                customDialog.Change();
+            }
+        }
     }
 
     public MediaPlayer getMediaPlayer() {
         return mediaPlayer;
+    }
+    public void EndActivity(){
+        finish();
     }
 }

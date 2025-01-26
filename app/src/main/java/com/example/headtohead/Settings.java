@@ -43,7 +43,8 @@ private RadioButton kahoot,lofi,rickroll,intense;
     public void onClick(View v) {
 if(v==btngoBackToMain){
     Intent resultIntent = new Intent();
-    resultIntent.putExtra("resultKey", "This is the result");
+    resultIntent.putExtra("SongName", selectedSong);
+    resultIntent.putExtra("PlaySong", String.valueOf(onoff));
     setResult(RESULT_OK,resultIntent);
     finish();
 }

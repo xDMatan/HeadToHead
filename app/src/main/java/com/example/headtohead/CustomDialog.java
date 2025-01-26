@@ -26,8 +26,10 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
     private Button GoBackHome;
     private int scorea,scoreb;
     private Handler handler;
-    public CustomDialog(@NonNull Context context) {
+    private GameActivityClassic gameActivityClassic;
+    public CustomDialog(@NonNull Context context , GameActivityClassic gameActivityClassic) {
         super(context);
+        this.gameActivityClassic = gameActivityClassic;
     }
 
 
@@ -45,7 +47,7 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
         handler = new Handler();
 
     }
-    public void Change(GameActivityClassic gameActivityClassic) {
+    public void Change() {
         if (gameActivityClassic.getPlayer() == gameActivityClassic.getWhichPLayerisPlaying()) {
             scoreb++;
             score1.setText(Integer.toString(scorea));
@@ -70,20 +72,19 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
         else
         {
             if(gameActivityClassic.getPlayer()==2){
-
+                DatabaseReference ShowCustomDialog = FirebaseDatabase.getInstance().getReference("ClassicGameControl/ShowCustomDialog");
+                ShowCustomDialog.setValue(false);
+                gameActivityClassic.GetANewRandomQuestion();
+                DatabaseReference CurrentPlayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
+                CurrentPlayer.setValue(null);
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         dismiss();
-                        DatabaseReference ShowCustomDialog = FirebaseDatabase.getInstance().getReference("ClassicGameControl/ShowCustomDialog");
-                        ShowCustomDialog.setValue(false);
-                        gameActivityClassic.GetANewRandomQuestion();
-                        DatabaseReference CurrentPlayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
-                        CurrentPlayer.setValue(null);
                         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentQuestion");
                         reference.setValue(gameActivityClassic.getTemp().get(0).getQuestion());//מעלה את השאלה לfb
                     }
-                },4000);
+                },4750);
             }
             else{
                 handler.postDelayed(new Runnable() {
@@ -100,8 +101,7 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
     public void onClick(View view) {
         if(view == GoBackHome) {
             dismiss();
-            Intent i = new Intent(getContext(), MainActivity.class);
-            getContext().startActivity(i);
+            gameActivityClassic.EndActivity();
         }
     }
 }
