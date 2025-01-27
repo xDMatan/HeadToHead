@@ -143,7 +143,7 @@ public class GameActivityClassic extends AppCompatActivity implements View.OnCli
             etAnswer.setFocusableInTouchMode(true);
             etAnswer.setInputType(InputType.TYPE_CLASS_TEXT);
 
-            countDownTimer = new CountDownTimer(7500, 50) {
+            countDownTimer = new CountDownTimer(15000, 50) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     long seconds = millisUntilFinished / 1000;
