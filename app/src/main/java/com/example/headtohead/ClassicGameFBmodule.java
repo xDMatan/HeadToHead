@@ -81,7 +81,7 @@ public class ClassicGameFBmodule {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.getValue(String.class).equals(""))
-                gameActivityClassic.SetQuestionForPlayersAndStartTheGame(snapshot.getValue(String.class));
+                    gameActivityClassic.SetQuestionForPlayersAndStartTheGame(snapshot.getValue(String.class));
             }
 
             @Override

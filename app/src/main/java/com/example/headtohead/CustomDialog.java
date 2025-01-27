@@ -44,6 +44,7 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
         score2 = findViewById(R.id.score2);
         currentscore = findViewById(R.id.currentscore);
         GoBackHome = findViewById(R.id.btnHome);
+        GoBackHome.setOnClickListener(this);
         handler = new Handler();
 
     }
@@ -58,42 +59,22 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
             score2.setText(Integer.toString(scoreb));
         }
         if(scorea==2||scoreb==2){
-            if(gameActivityClassic.getMediaPlayer()!=null)
-                gameActivityClassic.getMediaPlayer().release();
             if(scoreb==2)
                 currentscore.setText("Lost");
             if(scorea==2)
                 currentscore.setText("WINNER");
             GoBackHome.setClickable(true);
             GoBackHome.setVisibility(View.VISIBLE);
-            GoBackHome.setOnClickListener(this);
-
         }
         else
         {
-            if(gameActivityClassic.getPlayer()==2){
-                DatabaseReference ShowCustomDialog = FirebaseDatabase.getInstance().getReference("ClassicGameControl/ShowCustomDialog");
-                ShowCustomDialog.setValue(false);
-                gameActivityClassic.GetANewRandomQuestion();
-                DatabaseReference CurrentPlayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
-                CurrentPlayer.setValue(null);
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        dismiss();
-                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentQuestion");
-                        reference.setValue(gameActivityClassic.getTemp().get(0).getQuestion());//מעלה את השאלה לfb
-                    }
-                },4750);
-            }
-            else{
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         dismiss();
                     }
                 },4000);
-            }
+
         }
     }
 
@@ -101,7 +82,28 @@ public class CustomDialog extends Dialog implements View.OnClickListener {
     public void onClick(View view) {
         if(view == GoBackHome) {
             dismiss();
-            gameActivityClassic.EndActivity();
+            gameActivityClassic.finish();
         }
+
+    }
+    @Override
+    public void dismiss() {
+        super.dismiss();
+        if (scorea != 2 && scoreb != 2) {
+            if (gameActivityClassic.getPlayer() == 2) {
+                DatabaseReference ShowCustomDialog = FirebaseDatabase.getInstance().getReference("ClassicGameControl/ShowCustomDialog");
+                ShowCustomDialog.setValue(false);
+                gameActivityClassic.GetANewRandomQuestion();
+                DatabaseReference CurrentPlayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
+                CurrentPlayer.setValue(null);
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentQuestion");
+                reference.setValue(gameActivityClassic.getTemp().get(0).getQuestion());//מעלה את השאלה לfb
+            }
+        }
+
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 }

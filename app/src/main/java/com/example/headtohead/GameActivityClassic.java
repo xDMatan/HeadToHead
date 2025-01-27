@@ -7,10 +7,10 @@ import android.os.Handler;
 import android.text.InputType;
 import android.os.CountDownTimer;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
 import java.util.Random;
 
 
@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.headtohead.question.ClassicQuestion;
 import com.example.headtohead.question.GameCollections;
-import com.example.headtohead.question.Question;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -29,21 +28,21 @@ import java.util.HashMap;
 
 public class GameActivityClassic extends AppCompatActivity implements View.OnClickListener {
     private GameCollections collections;
-    private EditText etAnwser;
+    private EditText etAnswer;
     private ImageButton ibSend;
     private ClassicGameFBmodule fBmodule;
-   private RecyclerView RvChat;
+    private RecyclerView RvChat;
     private ClassicQuestion CurrentQuestion;
     private int player;
-    private TextView tvQuestion,Current;
+    private TextView tvQuestion, Current;
     private Handler handler;
     private CountDownTimer countDownTimer;
-private MediaPlayer mediaPlayer;
+    private MediaPlayer mediaPlayer;
     private ArrayList<String> stringArrayList;
-   private int WhichPLayerisPlaying=0;
-   private String WaitingString;
+    private int WhichPLayerisPlaying = 0;
+    private String WaitingString;
     private CustomDialog customDialog;
-    private ArrayList<ClassicQuestion> classicCollection,Temp;
+    private ArrayList<ClassicQuestion> classicCollection, Temp;
     private Intent intent;
 
 
@@ -52,10 +51,10 @@ private MediaPlayer mediaPlayer;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_classic);
         intent = getIntent();
-        if(intent.getStringExtra("PlaySong").equals("true")) {
+        if (intent.getStringExtra("PlaySong").equals("true")) {
             String Song = intent.getStringExtra("SongName");
             int resourceId = getResources().getIdentifier(Song, "raw", getPackageName());
-            mediaPlayer = MediaPlayer.create(this,resourceId );
+            mediaPlayer = MediaPlayer.create(this, resourceId);
 
 
             mediaPlayer.setLooping(true);
@@ -63,24 +62,24 @@ private MediaPlayer mediaPlayer;
         }
         collections = new GameCollections();
         classicCollection = collections.getClassisCollection();
-        etAnwser = findViewById(R.id.etAnwser);
+        etAnswer = findViewById(R.id.etAnwser);
         ibSend = findViewById(R.id.ibSendAnswer);
         ibSend.setOnClickListener(this);
         tvQuestion = findViewById(R.id.TvQuestion);
         fBmodule = new ClassicGameFBmodule(this);
         fBmodule.ClassicSetPlayers(this);
-        CurrentQuestion = new ClassicQuestion("","",new HashMap<>(),false);
+        CurrentQuestion = new ClassicQuestion("", "", new HashMap<>(), false);
         RvChat = findViewById(R.id.rvChat);
-        stringArrayList =new ArrayList<String>();
+        stringArrayList = new ArrayList<String>();
         Temp = collections.getClassisCollection();
         // Set up RecyclerView
         RvChat.setLayoutManager(new LinearLayoutManager(this));
         RvChat.setAdapter(new StringAdapter(stringArrayList));
-        etAnwser.setFocusable(false);
+        etAnswer.setFocusable(false);
         handler = new Handler();
-        Current= findViewById(R.id.Tvcurrent);
+        Current = findViewById(R.id.Tvcurrent);
         WaitingString = "Strating game in a few Seconds";
-        customDialog = new CustomDialog(this,this);
+        customDialog = new CustomDialog(this, this);
         fBmodule.Chat(this);
         fBmodule.SetQuestion(this);
         fBmodule.ShowCustomDialog(this);
@@ -101,7 +100,15 @@ private MediaPlayer mediaPlayer;
 
         }
     }
-    public void SetQuestionForPlayersAndStartTheGame(String Question){
+
+    public void SetQuestionForPlayersAndStartTheGame(String Question) {
+        if (customDialog.getHandler() != null) {
+            customDialog.getHandler().removeCallbacksAndMessages(null);
+        }
+        if(this.player==1&&customDialog.isShowing())
+        {
+            customDialog.dismiss();
+        }
         stringArrayList.clear();
         RvChat.setAdapter(new StringAdapter(stringArrayList));
         tvQuestion.setText(WaitingString);
@@ -113,7 +120,7 @@ private MediaPlayer mediaPlayer;
                     if (Question.equals(classicCollection.get(i).getQuestion()))
                         CurrentQuestion = classicCollection.get(i);
                 }
-                if ( getPlayer()== 2) {
+                if (getPlayer() == 2) {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -122,20 +129,21 @@ private MediaPlayer mediaPlayer;
                             DatabaseReference CurrentPLayer = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
                             CurrentPLayer.setValue(WhoplaysFirst);
                         }
-                    },1000);
+                    }, 1000);
                 }
             }
-        } ,2000);
+        }, 2000);
     }
-    public void GameTime(){
-        tvQuestion.setText(CurrentQuestion.getQuestion());
-        if(getWhichPLayerisPlaying() ==this.player){
-            etAnwser.setFocusable(true);
-            etAnwser.setEnabled(true);
-            etAnwser.setFocusableInTouchMode(true);
-            etAnwser.setInputType(InputType.TYPE_CLASS_TEXT);
 
-            countDownTimer = new CountDownTimer(15000, 50) {
+    public void GameTime() {
+        tvQuestion.setText(CurrentQuestion.getQuestion());
+        if (WhichPLayerisPlaying == this.player) {
+            etAnswer.setFocusable(true);
+            etAnswer.setEnabled(true);
+            etAnswer.setFocusableInTouchMode(true);
+            etAnswer.setInputType(InputType.TYPE_CLASS_TEXT);
+
+            countDownTimer = new CountDownTimer(7500, 50) {
                 @Override
                 public void onTick(long millisUntilFinished) {
                     long seconds = millisUntilFinished / 1000;
@@ -152,10 +160,14 @@ private MediaPlayer mediaPlayer;
 
                 }
             }.start();
-        }
-
-        else {
+        } else {
+            if(countDownTimer!=null)
+                countDownTimer.cancel();
             Current.setText("opponnent's turn...");
+            etAnswer.setFocusable(false);
+            etAnswer.setEnabled(false);
+            etAnswer.setFocusableInTouchMode(false);
+            etAnswer.setInputType(InputType.TYPE_NULL);
 
         }
     }
@@ -164,66 +176,64 @@ private MediaPlayer mediaPlayer;
     @Override
     public void onClick(View v) {
         if (v == ibSend) {
-            if(!etAnwser.getText().toString().equals("")) {
+            if (!etAnswer.getText().toString().equals("")) {
                 DatabaseReference reference = FirebaseDatabase.getInstance().getReference("ClassicGameControl/Chat");
-                reference.setValue(etAnwser.getText().toString());//מעלה את השאלה לfb
+                reference.setValue(etAnswer.getText().toString());//מעלה את השאלה לfb
             }
         }
     }
 
     public void GetANewRandomQuestion() {
-            Boolean valid = false;
-            while (!valid) {
-                java.util.Collections.shuffle(Temp);
-                if (!Temp.get(0).getWaseverused() ) {
-                    Temp.get(0).setWaseverused(true);
-                    valid = true;
-                }
-
+        Boolean valid = false;
+        while (!valid) {
+            java.util.Collections.shuffle(Temp);
+            if (!Temp.get(0).getWaseverused()) {
+                Temp.get(0).setWaseverused(true);
+                valid = true;
             }
+
+        }
 
 
     }
 
     public void SetChat(String LastMassage) {
-        String Result ="";
+        String Result = "";
         String Name = "";
-        if(this.player ==this.WhichPLayerisPlaying)
-            Name+= "אתה";
+        if (this.player == this.WhichPLayerisPlaying)
+            Name += "אתה";
         else
-            Name+="יריב";
-if(CurrentQuestion.getAnswers().containsKey(LastMassage)){
-    if(CurrentQuestion.getAnswers().get(LastMassage)) {
-        Result += "נכון";
+            Name += "יריב";
+        if (CurrentQuestion.getAnswers().containsKey(LastMassage)) {
+            if (CurrentQuestion.getAnswers().get(LastMassage)) {
+                Result += "נכון";
 
-    }
-    else
-        Result +="היה כבר בשימוש";
-}
-else
-    Result +="לא נכון";
-        stringArrayList.add(Name+ " : "+LastMassage + " - " + Result);
+            } else
+                Result += "היה כבר בשימוש";
+        } else
+            Result += "לא נכון";
+        stringArrayList.add(Name + " : " + LastMassage + " - " + Result);
         RvChat.setAdapter(new StringAdapter(stringArrayList));
         RvChat.scrollToPosition(stringArrayList.size() - 1);
-        etAnwser.setText("");
-        if(CurrentQuestion.getAnswers().containsKey(LastMassage)) {//אם התשובה הייתה נכונה תעביא את התור לשחקו הבא
+        etAnswer.setText("");
+        if (CurrentQuestion.getAnswers().containsKey(LastMassage)) {//אם התשובה הייתה נכונה תעביא את התור לשחקו הבא
             if (CurrentQuestion.getAnswers().get(LastMassage)) {
                 CurrentQuestion.getAnswers().put(LastMassage, false);
 
-                if(this.player==getWhichPLayerisPlaying()){
-                    etAnwser.setFocusable(false);
-                    etAnwser.setEnabled(false);
-                    etAnwser.setFocusableInTouchMode(false);
-                    etAnwser.setInputType(InputType.TYPE_NULL);
+                if (this.player == getWhichPLayerisPlaying()) {
+                    etAnswer.setFocusable(false);
+                    etAnswer.setEnabled(false);
+                    etAnswer.setFocusableInTouchMode(false);
+                    etAnswer.setInputType(InputType.TYPE_NULL);
                     countDownTimer.cancel();
 
                     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("ClassicGameControl/CurrentPlayer");
-                if (getWhichPLayerisPlaying() == 1)
-                    reference.setValue(2);
-                else
-                    reference.setValue(1);
+                    if (getWhichPLayerisPlaying() == 1)
+                        reference.setValue(2);
+                    else
+                        reference.setValue(1);
+                }
             }
-        }
         }
     }
 
@@ -244,9 +254,8 @@ else
         return Temp;
     }
 
-    public void CustomDialog(){
+    public void CustomDialog() {
         if (!isFinishing() && !isDestroyed()) {
-            // וודא שהדיאלוג לא מוצג אם הוא כבר פעיל
             if (customDialog != null && !customDialog.isShowing()) {
                 customDialog.show();
                 customDialog.Change();
@@ -254,10 +263,17 @@ else
         }
     }
 
-    public MediaPlayer getMediaPlayer() {
-        return mediaPlayer;
-    }
-    public void EndActivity(){
-        finish();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+        }
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
+        if(countDownTimer!=null)
+            countDownTimer.cancel();
+
     }
 }

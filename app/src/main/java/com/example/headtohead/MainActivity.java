@@ -66,10 +66,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==1){
             if(resultCode==RESULT_OK) {
-                if(data.getStringExtra("SongName")!=null)
-                SongName = data.getStringExtra("SongName");
-                if(data.getStringExtra("PlaySong")!=null)
+                if(data.getStringExtra("SongName")!=null) {
+                    SongName = data.getStringExtra("SongName");
+                }
+
+                if(data.getStringExtra("PlaySong")!=null) {
                     PlaySong = data.getStringExtra("PlaySong");
+                }
             }
         }
     }
